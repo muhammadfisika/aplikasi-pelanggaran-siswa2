@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+
+    <link rel="manifest" href="./manifest.json">
+
+<meta name="theme-color" content="#0d6efd">
+
+<meta
+  name="mobile-web-app-capable"
+  content="yes"
+>
+
+<meta
+  name="apple-mobile-web-app-capable"
+  content="yes"
+>
+
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="default"
+>
+
+<meta
+  name="apple-mobile-web-app-title"
+  content="GDS"
+>
+
+<link
+  rel="apple-touch-icon"
+  href="./icon-192.png"
+>
+    
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color"
+          content="#2563eb">
+
+    <meta name="description"
+          content="Aplikasi Pencatat Pelanggaran Siswa">
+
+    <title>Pelanggaran Siswa</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+
+<!-- =====================================================
+     LOGIN
+===================================================== -->
+
+<div id="loginPage" class="page">
+
+    <div class="login-container">
+
+        <div class="logo">
+            🎓
+        </div>
+
+        <h1>Pelanggaran Siswa</h1>
+
+        <p class="subtitle">
+            Sistem Pencatatan Pelanggaran Siswa
+        </p>
+
+        <div class="card">
+
+            <h2>Login</h2>
+
+            <div class="form-group">
+
+                <label>Username</label>
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Masukkan username"
+                    autocomplete="username"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Masukkan password"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+            <button
+                class="btn btn-primary btn-full"
+                onclick="login()">
+
+                Masuk
+
+            </button>
+
+            <div id="loginMessage"
+                 class="message">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     DASHBOARD GDS
+===================================================== -->
+
+<div id="gdsPage" class="page hidden">
+
+    <header class="header">
+
+        <div>
+
+            <h2>Petugas GDS</h2>
+
+            <span id="gdsUserName"></span>
+
+        </div>
+
+        <button
+            class="btn btn-danger"
+            onclick="logout()">
+
+            Keluar
+
+        </button>
+
+    </header>
+
+
+    <main class="container">
+
+        <div class="card">
+
+            <h2>Catat Pelanggaran</h2>
+
+            <p class="info">
+                Silakan cari dan pilih siswa yang melakukan
+                pelanggaran.
+            </p>
+
+
+            <!-- CARI SISWA -->
+
+            <div class="form-group">
+
+                <label>Cari Nama Siswa</label>
+
+                <input
+                    type="text"
+                    id="searchSiswa"
+                    placeholder="Ketik nama siswa..."
+                    oninput="cariSiswa()"
+                >
+
+            </div>
+
+
+            <div id="hasilSiswa"
+                 class="search-result">
+            </div>
+
+
+            <!-- SISWA TERPILIH -->
+
+           <div id="selectedStudent"
+     class="selected-student hidden">
+
+    <div class="student-photo-wrapper">
+
+        <img
+            id="selectedPhoto"
+            class="student-photo"
+            src=""
+            alt="Foto siswa"
+            onerror="this.src='icon.svg'"
+        >
+
+    </div>
+
+    <div class="student-info">
+
+        <strong id="selectedName">
+            -
+        </strong>
+
+        <span id="selectedClass">
+            -
+        </span>
+
+        <small id="selectedNis">
+            -
+        </small>
+
+    </div>
+
+    <button
+        onclick="hapusSiswa()"
+        class="remove-btn">
+
+        ×
+
+    </button>
+
+</div>
+
+
+            <!-- FORM PELANGGARAN -->
+
+            <div id="formPelanggaran"
+                 class="hidden">
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>Tanggal</label>
+
+                        <input
+                            type="date"
+                            id="tanggal"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Waktu</label>
+
+                        <input
+                            type="time"
+                            id="waktu"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Jenis Pelanggaran
+                    </label>
+
+                    <select
+                        id="tingkat"
+                        onchange="filterPelanggaran()">
+
+                        <option value="">
+                            -- Pilih Tingkat --
+                        </option>
+
+                        <option value="Ringan">
+                            Ringan (1 Poin)
+                        </option>
+
+                        <option value="Sedang">
+                            Sedang (5 Poin)
+                        </option>
+
+                        <option value="Berat">
+                            Berat (10 Poin)
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Rincian Pelanggaran
+                    </label>
+
+                    <select id="rincian">
+
+                        <option value="">
+                            -- Pilih rincian --
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div id="bobotInfo"
+                     class="bobot-info hidden">
+
+                    Bobot:
+                    <strong id="bobotText">
+                        0
+                    </strong>
+                    poin
+
+                </div>
+
+
+                <button
+                    class="btn btn-primary btn-full"
+                    onclick="simpanPelanggaran()">
+
+                    💾 Simpan Pelanggaran
+
+                </button>
+
+
+                <div id="saveMessage"
+                     class="message">
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     DASHBOARD GURU
+===================================================== -->
+
+<div id="guruPage" class="page hidden">
+
+    <header class="header">
+
+        <div>
+
+            <h2>Dashboard Guru</h2>
+
+            <span id="guruUserName"></span>
+
+        </div>
+
+        <button
+            class="btn btn-danger"
+            onclick="logout()">
+
+            Keluar
+
+        </button>
+
+    </header>
+
+
+    <main class="container">
+
+
+        <!-- RINGKASAN -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <span>👥</span>
+
+                <strong id="totalSiswa">
+                    0
+                </strong>
+
+                <small>
+                    Siswa Melanggar
+                </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span>📝</span>
+
+                <strong id="totalKasus">
+                    0
+                </strong>
+
+                <small>
+                    Total Pelanggaran
+                </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span>🏆</span>
+
+                <strong id="poinTertinggi">
+                    0
+                </strong>
+
+                <small>
+                    Poin Tertinggi
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- REKAP -->
+
+        <div class="card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Ranking Pelanggaran
+                    </h2>
+
+                    <p class="info">
+                        Diurutkan berdasarkan total bobot.
+                    </p>
+
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="loadRekap()">
+
+                    🔄 Refresh
+
+                </button>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Ranking
+                            </th>
+
+                            <th>
+                                Siswa
+                            </th>
+
+                            <th>
+                                Kelas
+                            </th>
+
+                            <th>
+                                Ringan
+                            </th>
+
+                            <th>
+                                Sedang
+                            </th>
+
+                            <th>
+                                Berat
+                            </th>
+
+                            <th>
+                                Total Poin
+                            </th>
+
+                            <th>
+                                Detail
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="rankingTable">
+
+                        <tr>
+
+                            <td colspan="8"
+                                class="empty">
+
+                                Memuat data...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL DETAIL
+===================================================== -->
+
+<div id="detailModal"
+     class="modal hidden">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2 id="detailTitle">
+                Detail Pelanggaran
+            </h2>
+
+            <button
+                onclick="closeDetail()"
+                class="close-btn">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div id="detailStudent"
+             class="detail-student">
+        </div>
+
+
+        <div id="detailList">
+
+            Memuat...
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     LOADING
+===================================================== -->
+
+<div id="loading"
+     class="loading hidden">
+
+    <div class="spinner"></div>
+
+    <span>
+        Memproses...
+    </span>
+
+</div>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>
