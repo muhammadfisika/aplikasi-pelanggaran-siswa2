@@ -1898,3 +1898,116 @@ if ("serviceWorker" in navigator) {
     );
 
 }
+
+
+// =====================================
+// FIREBASE CONNECTION TEST
+// =====================================
+
+async function testFirebaseConnection() {
+
+    try {
+
+        console.log(
+            "🔥 Menguji koneksi Firebase..."
+        );
+
+
+        if (!window.firebaseDB) {
+
+            throw new Error(
+                "Firebase Firestore belum tersedia."
+            );
+
+        }
+
+
+        const {
+            collection,
+            getDocs,
+            limit,
+            query
+        } = window.firebaseModules;
+
+
+        // Ambil maksimal 1 data siswa
+        const siswaRef =
+            collection(
+                window.firebaseDB,
+                "siswa"
+            );
+
+
+        const siswaQuery =
+            query(
+                siswaRef,
+                limit(1)
+            );
+
+
+        const snapshot =
+            await getDocs(siswaQuery);
+
+
+        console.log(
+            "🔥 Firebase berhasil terhubung."
+        );
+
+
+        console.log(
+            "Jumlah dokumen yang terbaca:",
+            snapshot.size
+        );
+
+
+        if (snapshot.empty) {
+
+            console.log(
+                "ℹ️ Collection siswa masih kosong."
+            );
+
+        } else {
+
+            snapshot.forEach(
+                function(doc) {
+
+                    console.log(
+                        "Data siswa:",
+                        doc.id,
+                        doc.data()
+                    );
+
+                }
+            );
+
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Firebase gagal terhubung:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+window.addEventListener(
+    "load",
+    function() {
+
+        setTimeout(
+            testFirebaseConnection,
+            1000
+        );
+
+    }
+);
