@@ -2856,16 +2856,6 @@ function pilihJenisPelanggaranFirebase() {
 
 }
 
-<select
-    id="idPelanggaran"
-    onchange="
-        pilihJenisPelanggaranFirebase()
-    "
->
-    <option value="">
-        Pilih jenis pelanggaran
-    </option>
-</select>
 
 <div id="infoBobot"></div>
 
