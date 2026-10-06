@@ -1,6 +1,70 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<script type="module">
+  import { initializeApp } from
+    "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    limit,
+    query
+  } from
+    "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+
+  // =====================================
+  // FIREBASE CONFIG
+  // =====================================
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyDV1sMCsrQKF1l02pOhKkCbNEL19erk2b0",
+  authDomain: "data-pelanggaran-siswa-dcc1c.firebaseapp.com",
+  projectId: "data-pelanggaran-siswa-dcc1c",
+  storageBucket: "data-pelanggaran-siswa-dcc1c.firebasestorage.app",
+  messagingSenderId: "36989542207",
+  appId: "1:36989542207:web:317a68b9bf624720df3d8a"
+};
+
+
+  // =====================================
+  // INITIALIZE FIREBASE
+  // =====================================
+
+  const firebaseApp =
+    initializeApp(firebaseConfig);
+
+
+  // =====================================
+  // FIRESTORE
+  // =====================================
+
+  const db =
+    getFirestore(firebaseApp);
+
+
+  // Simpan agar bisa digunakan app.js
+  window.firebaseApp = firebaseApp;
+  window.firebaseDB = db;
+
+  window.firebaseModules = {
+
+    collection,
+    getDocs,
+    limit,
+    query
+
+  };
+
+
+  console.log(
+    "🔥 Firebase berhasil diinisialisasi"
+  );
+
+</script>
+    
     <meta charset="UTF-8">
 
     <link rel="manifest" href="./manifest.json">
