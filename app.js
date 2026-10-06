@@ -2857,24 +2857,7 @@ function pilihJenisPelanggaranFirebase() {
 }
 
 
-<div id="infoBobot"></div>
 
-
-<input
-    type="text"
-    id="searchSiswa"
-    placeholder="Cari nama / NIS / kelas..."
-    oninput="cariSiswaFirebase()"
->
-
-        <div id="hasilPencarianSiswa"></div>
-
-<div id="hasilPencarianSiswa"></div>
-
-<div
-    id="siswaTerpilih"
-    style="display:none;"
-></div>
 
 window.addEventListener(
     "load",
