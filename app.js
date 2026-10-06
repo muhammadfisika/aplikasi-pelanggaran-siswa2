@@ -1,3 +1,16 @@
+// =====================================
+// DATA MASTER FIREBASE
+// =====================================
+
+let daftarSiswaFirebase = [];
+
+let daftarPelanggaranFirebase = [];
+
+let siswaTerpilihFirebase = null;
+
+let pelanggaranTerpilihFirebase = null;
+
+
 /****************************************************
  * APLIKASI PENCATAT PELANGGARAN SISWA
  * FRONTEND
@@ -2011,3 +2024,883 @@ window.addEventListener(
 
     }
 );
+
+
+// =====================================
+// FIREBASE - AMBIL DATA SISWA
+// =====================================
+
+async function ambilDataSiswaFirebase() {
+
+    try {
+
+        if (!window.firebaseDB) {
+
+            throw new Error(
+                "Firebase belum terhubung."
+            );
+
+        }
+
+
+        const {
+            collection,
+            getDocs,
+            query,
+            where
+        } = window.firebaseModules;
+
+
+        const siswaRef =
+            collection(
+                window.firebaseDB,
+                "siswa"
+            );
+
+
+        // Hanya siswa aktif
+        const siswaQuery =
+            query(
+                siswaRef,
+                where(
+                    "aktif",
+                    "==",
+                    true
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(siswaQuery);
+
+
+        const data = [];
+
+
+        snapshot.forEach(
+            function(doc) {
+
+                const item =
+                    doc.data();
+
+
+                data.push({
+
+                    idSiswa: doc.id,
+
+                    nama:
+                        item.nama || "",
+
+                    nis:
+                        item.nis || "",
+
+                    kelas:
+                        item.kelas || "",
+
+                    foto:
+                        item.foto || "",
+
+                    aktif:
+                        item.aktif !== false
+
+                });
+
+            }
+        );
+
+
+        // Urutkan berdasarkan nama
+        data.sort(
+            function(a, b) {
+
+                return a.nama.localeCompare(
+                    b.nama,
+                    "id"
+                );
+
+            }
+        );
+
+
+        console.log(
+            "👨‍🎓 Data siswa Firebase:",
+            data
+        );
+
+
+        return data;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Gagal mengambil data siswa:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+// =====================================
+// FIREBASE - JENIS PELANGGARAN
+// =====================================
+
+async function ambilJenisPelanggaranFirebase() {
+
+    try {
+
+        if (!window.firebaseDB) {
+
+            throw new Error(
+                "Firebase belum terhubung."
+            );
+
+        }
+
+
+        const {
+            collection,
+            getDocs,
+            query,
+            where
+        } = window.firebaseModules;
+
+
+        const ref =
+            collection(
+                window.firebaseDB,
+                "jenis_pelanggaran"
+            );
+
+
+        const q =
+            query(
+                ref,
+                where(
+                    "aktif",
+                    "==",
+                    true
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(q);
+
+
+        const data = [];
+
+
+        snapshot.forEach(
+            function(doc) {
+
+                const item =
+                    doc.data();
+
+
+                data.push({
+
+                    id:
+                        doc.id,
+
+                    nama:
+                        item.nama || "",
+
+                    tingkat:
+                        String(
+                            item.tingkat || ""
+                        ).toLowerCase(),
+
+                    bobot:
+                        Number(
+                            item.bobot || 0
+                        ),
+
+                    aktif:
+                        item.aktif !== false
+
+                });
+
+            }
+        );
+
+
+        data.sort(
+            function(a, b) {
+
+                return a.nama.localeCompare(
+                    b.nama,
+                    "id"
+                );
+
+            }
+        );
+
+
+        console.log(
+            "📋 Jenis pelanggaran Firebase:",
+            data
+        );
+
+
+        return data;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Gagal mengambil jenis pelanggaran:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+// =====================================
+// LOAD MASTER FIREBASE
+// =====================================
+
+async function loadMasterFirebase() {
+
+    try {
+
+        showLoading(true);
+
+
+        const hasilSiswa =
+            await ambilDataSiswaFirebase();
+
+
+        const hasilPelanggaran =
+            await ambilJenisPelanggaranFirebase();
+
+
+        daftarSiswaFirebase =
+            hasilSiswa;
+
+
+        daftarPelanggaranFirebase =
+            hasilPelanggaran;
+
+
+        console.log(
+            "✅ Master Firebase berhasil dimuat"
+        );
+
+
+        console.log(
+            "Jumlah siswa:",
+            daftarSiswaFirebase.length
+        );
+
+
+        console.log(
+            "Jumlah jenis pelanggaran:",
+            daftarPelanggaranFirebase.length
+        );
+
+
+        // Isi dropdown/filter jika tersedia
+        tampilkanJenisPelanggaranFirebase();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        if (
+            typeof showMessage ===
+            "function"
+        ) {
+
+            showMessage(
+                "Gagal mengambil data Firebase: " +
+                error.message,
+                "error"
+            );
+
+        }
+
+    } finally {
+
+        showLoading(false);
+
+    }
+
+}
+
+// =====================================
+// TAMPILKAN JENIS PELANGGARAN
+// =====================================
+
+function tampilkanJenisPelanggaranFirebase() {
+
+    const select =
+        document.getElementById(
+            "idPelanggaran"
+        );
+
+
+    if (!select) {
+
+        console.warn(
+            "Element #idPelanggaran tidak ditemukan."
+        );
+
+        return;
+
+    }
+
+
+    select.innerHTML = `
+
+        <option value="">
+            Pilih jenis pelanggaran
+        </option>
+
+    `;
+
+
+    const tingkatUrutan = {
+
+        ringan: 1,
+
+        sedang: 2,
+
+        berat: 3
+
+    };
+
+
+    const data =
+        [...daftarPelanggaranFirebase]
+        .sort(
+            function(a, b) {
+
+                const urutanA =
+                    tingkatUrutan[a.tingkat]
+                    || 99;
+
+                const urutanB =
+                    tingkatUrutan[b.tingkat]
+                    || 99;
+
+
+                if (
+                    urutanA !==
+                    urutanB
+                ) {
+
+                    return (
+                        urutanA -
+                        urutanB
+                    );
+
+                }
+
+
+                return a.nama.localeCompare(
+                    b.nama,
+                    "id"
+                );
+
+            }
+        );
+
+
+    data.forEach(
+        function(item) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                item.id;
+
+
+            option.dataset.tingkat =
+                item.tingkat;
+
+
+            option.dataset.bobot =
+                item.bobot;
+
+
+            option.textContent =
+                item.nama +
+                " (" +
+                item.tingkat +
+                " - " +
+                item.bobot +
+                " poin)";
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+// =====================================
+// CARI SISWA FIREBASE
+// =====================================
+
+function cariSiswaFirebase() {
+
+    const input =
+        document.getElementById(
+            "searchSiswa"
+        );
+
+
+    const hasil =
+        document.getElementById(
+            "hasilPencarianSiswa"
+        );
+
+
+    if (!input || !hasil) {
+
+        return;
+
+    }
+
+
+    const keyword =
+        input.value
+            .toLowerCase()
+            .trim();
+
+
+    if (!keyword) {
+
+        hasil.innerHTML = "";
+
+        return;
+
+    }
+
+
+    const data =
+        daftarSiswaFirebase.filter(
+            function(item) {
+
+                return (
+
+                    item.nama
+                        .toLowerCase()
+                        .includes(keyword)
+
+                    ||
+
+                    String(item.nis)
+                        .toLowerCase()
+                        .includes(keyword)
+
+                    ||
+
+                    item.kelas
+                        .toLowerCase()
+                        .includes(keyword)
+
+                );
+
+            }
+        );
+
+
+    if (!data.length) {
+
+        hasil.innerHTML = `
+
+            <div class="empty-data">
+
+                Siswa tidak ditemukan.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    hasil.innerHTML =
+        data
+            .slice(0, 20)
+            .map(
+                function(item) {
+
+                    return `
+
+                        <div
+                            class="hasil-siswa"
+                            onclick="
+                                pilihSiswaFirebase(
+                                    '${escapeJS(item.idSiswa)}'
+                                )
+                            "
+                        >
+
+                            <img
+                                src="${
+                                    escapeHTML(
+                                        item.foto ||
+                                        "https://via.placeholder.com/100"
+                                    )
+                                }"
+                                class="ranking-photo"
+                                onerror="
+                                    this.src=
+                                    'https://via.placeholder.com/100'
+                                "
+                            >
+
+                            <div>
+
+                                <strong>
+                                    ${
+                                        escapeHTML(
+                                            item.nama
+                                        )
+                                    }
+                                </strong>
+
+                                <div>
+
+                                    NIS:
+                                    ${
+                                        escapeHTML(
+                                            item.nis
+                                        )
+                                    }
+
+                                </div>
+
+                                <div>
+
+                                    Kelas:
+                                    ${
+                                        escapeHTML(
+                                            item.kelas
+                                        )
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+// =====================================
+// PILIH SISWA
+// =====================================
+
+function pilihSiswaFirebase(idSiswa) {
+
+    const siswa =
+        daftarSiswaFirebase.find(
+            function(item) {
+
+                return String(
+                    item.idSiswa
+                ) === String(idSiswa);
+
+            }
+        );
+
+
+    if (!siswa) {
+
+        return;
+
+    }
+
+
+    siswaTerpilihFirebase =
+        siswa;
+
+
+    const hasil =
+        document.getElementById(
+            "hasilPencarianSiswa"
+        );
+
+
+    if (hasil) {
+
+        hasil.innerHTML = "";
+
+    }
+
+
+    const search =
+        document.getElementById(
+            "searchSiswa"
+        );
+
+
+    if (search) {
+
+        search.value =
+            siswa.nama;
+
+    }
+
+
+    const selected =
+        document.getElementById(
+            "siswaTerpilih"
+        );
+
+
+    if (selected) {
+
+        selected.innerHTML = `
+
+            <div class="selected-student">
+
+                <img
+                    src="${
+                        escapeHTML(
+                            siswa.foto ||
+                            "https://via.placeholder.com/100"
+                        )
+                    }"
+                    class="ranking-photo"
+                    onerror="
+                        this.src=
+                        'https://via.placeholder.com/100'
+                    "
+                >
+
+                <div>
+
+                    <strong>
+                        ${
+                            escapeHTML(
+                                siswa.nama
+                            )
+                        }
+                    </strong>
+
+                    <div>
+                        NIS:
+                        ${
+                            escapeHTML(
+                                siswa.nis
+                            )
+                        }
+                    </div>
+
+                    <div>
+                        Kelas:
+                        ${
+                            escapeHTML(
+                                siswa.kelas
+                            )
+                        }
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    onclick="
+                        batalPilihSiswaFirebase()
+                    "
+                >
+                    ✕
+                </button>
+
+            </div>
+
+        `;
+
+        selected.style.display =
+            "block";
+
+    }
+
+}
+
+function batalPilihSiswaFirebase() {
+
+    siswaTerpilihFirebase = null;
+
+
+    const selected =
+        document.getElementById(
+            "siswaTerpilih"
+        );
+
+
+    if (selected) {
+
+        selected.innerHTML = "";
+
+        selected.style.display =
+            "none";
+
+    }
+
+
+    const search =
+        document.getElementById(
+            "searchSiswa"
+        );
+
+
+    if (search) {
+
+        search.value = "";
+
+        search.focus();
+
+    }
+
+}
+
+// =====================================
+// PILIH JENIS PELANGGARAN
+// =====================================
+
+function pilihJenisPelanggaranFirebase() {
+
+    const select =
+        document.getElementById(
+            "idPelanggaran"
+        );
+
+
+    if (!select) return;
+
+
+    const id =
+        select.value;
+
+
+    pelanggaranTerpilihFirebase =
+        daftarPelanggaranFirebase.find(
+            function(item) {
+
+                return String(item.id) ===
+                    String(id);
+
+            }
+        )
+        || null;
+
+
+    const info =
+        document.getElementById(
+            "infoBobot"
+        );
+
+
+    if (
+        info &&
+        pelanggaranTerpilihFirebase
+    ) {
+
+        info.innerHTML = `
+
+            Tingkat:
+            <strong>
+                ${
+                    escapeHTML(
+                        pelanggaranTerpilihFirebase
+                            .tingkat
+                    )
+                }
+            </strong>
+
+            |
+
+            Bobot:
+            <strong>
+                ${
+                    pelanggaranTerpilihFirebase
+                        .bobot
+                }
+                poin
+            </strong>
+
+        `;
+
+    }
+
+}
+
+<select
+    id="idPelanggaran"
+    onchange="
+        pilihJenisPelanggaranFirebase()
+    "
+>
+    <option value="">
+        Pilih jenis pelanggaran
+    </option>
+</select>
+
+<div id="infoBobot"></div>
+
+
+<input
+    type="text"
+    id="searchSiswa"
+    placeholder="Cari nama / NIS / kelas..."
+    oninput="cariSiswaFirebase()"
+>
+
+        <div id="hasilPencarianSiswa"></div>
+
+<div id="hasilPencarianSiswa"></div>
+
+<div
+    id="siswaTerpilih"
+    style="display:none;"
+></div>
+
+window.addEventListener(
+    "load",
+    async function() {
+
+        try {
+
+            await loadMasterFirebase();
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    }
+);
+
+
